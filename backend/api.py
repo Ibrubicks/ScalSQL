@@ -5,7 +5,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 TASK_PREFIX = "translate English to SQL: "
-MODEL_DIR = os.getenv("MODEL_DIR", r"C:\Users\nadai\OneDrive\Documents\text2sql\model\t5_spider_ckpt")
+MODEL_DIR = os.getenv("MODEL_DIR", "./model/t5_spider_ckpt")
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
