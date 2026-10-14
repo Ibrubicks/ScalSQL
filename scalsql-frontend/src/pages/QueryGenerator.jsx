@@ -16,15 +16,35 @@ const QueryGenerator = () => {
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
 
-  const handleGenerate = () => {
-    if (!nlQuery) return;
-    setIsGenerating(true);
-    // Mock API Call
-    setTimeout(() => {
-      setGeneratedSql(`SELECT \n  DATE(timestamp) as query_date, \n  COUNT(*) as total_queries, \n  AVG(execution_time_ms) as avg_latency \nFROM queries_log \nWHERE \n  status = 'SUCCESS' \n  AND timestamp >= CURRENT_DATE - INTERVAL '7 days' \nGROUP BY 1 \nORDER BY 1 DESC;`);
-      setIsGenerating(false);
-    }, 1500);
-  };
+  const handleGenerate = async () => {
+  if (!nlQuery.trim()) return;
+
+  setIsGenerating(true);
+  try {
+    const res = await fetch("http://3.104.128.202:8000/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question: nlQuery,
+        max_new_tokens: 256,
+        num_beams: 4
+      })
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(txt || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    setGeneratedSql(data.sql || "");
+  } catch (e) {
+    setGeneratedSql(`-- ERROR: ${e.message}`);
+  } finally {
+    setIsGenerating(false);
+  }
+};
+
 
   const handleExecute = () => {
     // Navigate to results page with mock state
